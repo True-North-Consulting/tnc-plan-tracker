@@ -1,0 +1,11 @@
+{
+  "name": "varis-plan-tracker",
+  "displayName": "Varis Plan Tracker",
+  "version": "1.0.0",
+  "description": "A live progress tracker for multi-package plans, published as a private claude.ai artifact: weighted progress, the landing queue, a dependency graph, packages with PRs, and what needs the user.",
+  "author": { "name": "True North Consulting" },
+  "homepage": "https://github.com/True-North-Consulting/varis-plan-tracker",
+  "repository": "https://github.com/True-North-Consulting/varis-plan-tracker",
+  "license": "MIT",
+  "keywords": ["planning", "progress", "tracker", "artifact", "dependencies"]
+}

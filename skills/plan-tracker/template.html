@@ -1,0 +1,344 @@
+<title>{{TITLE}}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one column; a summary band (progress + counts), then packages grouped by workstream, then the two open lists. */
+:root {
+  --bg: #f3f6f8;
+  --surface: #ffffff;
+  --fg: #16232c;
+  --muted: #5d6f7b;
+  --line: #d9e2e8;
+  --accent: #2b7fb0;
+  --done: #2e8a5f;
+  --done-soft: #e2f3ea;
+  --work: #2b7fb0;
+  --work-soft: #e2eff7;
+  --land: #b5730f;
+  --land-soft: #fbefdc;
+  --todo: #8a9aa5;
+  --todo-soft: #eef2f4;
+  --track: #dfe7ec;
+  --font-display: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "Instrument Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f171d; --surface: #16212a; --fg: #e3ebf0; --muted: #93a6b2; --line: #263540;
+    --accent: #6cb6e3; --done: #5cc493; --done-soft: #183428; --work: #6cb6e3; --work-soft: #17303f;
+    --land: #e3a54a; --land-soft: #3a2c15; --todo: #7f909b; --todo-soft: #1d2a33; --track: #22313b;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f171d; --surface: #16212a; --fg: #e3ebf0; --muted: #93a6b2; --line: #263540;
+  --accent: #6cb6e3; --done: #5cc493; --done-soft: #183428; --work: #6cb6e3; --work-soft: #17303f;
+  --land: #e3a54a; --land-soft: #3a2c15; --todo: #7f909b; --todo-soft: #1d2a33; --track: #22313b;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.45; }
+.wrap { max-width: 920px; margin: 0 auto; padding-inline: 16px; padding-block: 28px 48px; display: grid; gap: 28px; }
+header { display: grid; gap: 6px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-size: 28px; font-weight: 700; margin: 0; text-wrap: balance; }
+.sub { color: var(--muted); margin: 0; }
+.summary { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 20px; display: grid; gap: 16px; }
+.big { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.big .pct { font-family: var(--font-display); font-size: 44px; font-weight: 700; line-height: 1; font-variant-numeric: tabular-nums; }
+.big .of { color: var(--muted); }
+.bar { height: 14px; border-radius: 7px; background: var(--track); overflow: hidden; display: flex; }
+.bar span { height: 100%; transition: width .4s ease; }
+.bar .s-landed { background: var(--done); }
+.bar .s-landing { background: var(--land); }
+.bar .s-running { background: var(--work); }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13px; color: var(--muted); }
+.legend b { color: var(--fg); font-variant-numeric: tabular-nums; }
+.dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+.group { display: grid; gap: 8px; }
+.group h2 { font-family: var(--font-display); font-size: 15px; font-weight: 600; margin: 0; display: flex; justify-content: space-between; gap: 12px; }
+.group h2 .count { font-family: var(--font-mono); font-size: 12px; font-weight: 400; color: var(--muted); }
+.rows { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
+.row { display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 11px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+.code { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.title { min-width: 0; }
+.title .name { font-weight: 500; }
+.title .note { font-size: 13px; color: var(--muted); }
+.right { display: flex; align-items: center; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
+.prs { font-family: var(--font-mono); font-size: 12px; display: flex; gap: 6px; }
+.prs a { color: var(--accent); text-decoration: none; }
+.prs a:hover, .prs a:focus-visible { text-decoration: underline; }
+.chip { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 999px; white-space: nowrap; }
+.chip.landed { background: var(--done-soft); color: var(--done); }
+.chip.landing { background: var(--land-soft); color: var(--land); }
+.chip.running { background: var(--work-soft); color: var(--work); }
+.chip.todo { background: var(--todo-soft); color: var(--todo); }
+.lists { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; min-width: 0; }
+.panel h2 { font-family: var(--font-display); font-size: 15px; margin: 0 0 8px; }
+.panel ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px; }
+.panel .empty { color: var(--muted); font-size: 14px; margin: 0; }
+.foot { font-size: 12px; color: var(--muted); font-family: var(--font-mono); }
+.state-msg { background: var(--surface); border: 1px dashed var(--line); border-radius: 10px; padding: 20px; color: var(--muted); }
+.flow { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 12px; min-width: 0; }
+.flow-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.flow h2 { font-family: var(--font-display); font-size: 15px; margin: 0; }
+.flow .hint { font-size: 12px; color: var(--muted); }
+.graph-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+.graph-scroll svg { display: block; }
+.g-col { font-family: var(--font-mono); font-size: 11px; fill: var(--muted); letter-spacing: .05em; text-transform: uppercase; }
+.g-node { cursor: default; outline: none; }
+.g-node rect.box { stroke-width: 1.5; }
+.g-node.landed rect.box { fill: var(--done-soft); stroke: var(--done); }
+.g-node.landing rect.box { fill: var(--land-soft); stroke: var(--land); }
+.g-node.running rect.box { fill: var(--work-soft); stroke: var(--work); }
+.g-node.todo rect.box { fill: var(--surface); stroke: var(--todo); stroke-dasharray: 4 3; }
+.g-node.todo.ready rect.box { stroke-dasharray: none; stroke: var(--fg); }
+.g-node .c { font-family: var(--font-mono); font-size: 12px; font-weight: 500; fill: var(--fg); }
+.g-node .n { font-family: var(--font-body); font-size: 11.5px; fill: var(--muted); }
+.g-node:focus-visible rect.box { stroke-width: 3; }
+.g-edge { fill: none; stroke-width: 1.5; }
+.g-edge.met { stroke: var(--line); }
+.g-edge.open { stroke: var(--land); }
+.graph.focus .g-node:not(.hi) { opacity: .25; }
+.graph.focus .g-edge:not(.hi) { opacity: .12; }
+.graph.focus .g-edge.hi { stroke-width: 2.5; }
+.queue { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.queue li { display: grid; grid-template-columns: 34px 52px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 9px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.queue li:first-child { border-top: 0; }
+.queue .pos { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.queue .who { min-width: 0; }
+.queue .br { font-family: var(--font-mono); font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.queue .blocks { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.queue li.now .pos { color: var(--land); font-weight: 600; }
+.queue li.now { background: var(--land-soft); border-radius: 8px; padding-inline: 10px; margin-inline: -10px; border-top-color: transparent; }
+.queue li.none { display: block; }
+.flock { margin: 0; font-size: 13px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px; }
+.flock b { color: var(--fg); font-weight: 600; }
+.flock code { font-family: var(--font-mono); font-size: 12px; overflow-wrap: anywhere; }
+.queue .empty { color: var(--muted); font-size: 14px; display: block; padding: 4px 0; }
+.waits { font-size: 12px; color: var(--land); }
+.waits.met { color: var(--muted); }
+@media (max-width: 560px) {
+  .row { grid-template-columns: 44px minmax(0, 1fr); }
+  .right { grid-column: 2; justify-content: flex-start; }
+  .big .pct { font-size: 36px; }
+}
+@media (prefers-reduced-motion: reduce) { .bar span { transition: none; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="source"></div>
+    <h1 id="heading">{{HEADING}}</h1>
+    <p class="sub" id="subtitle">Implementation progress, package by package. Weighted by size (S 1 · M 2 · L 3).</p>
+  </header>
+
+  <section class="summary" aria-label="Overall progress">
+    <div class="big"><span class="pct" id="pct">–</span><span class="of" id="of">Loading the latest status…</span></div>
+    <div class="bar" id="bar" role="img" aria-label="Progress bar"></div>
+    <div class="legend" id="legend"></div>
+  </section>
+
+  <section class="flow" aria-label="Landing queue">
+    <div class="flow-head"><h2>Landing queue</h2><span class="hint" id="queue-hint">One branch lands at a time. The one blocking the most downstream packages goes first.</span></div>
+    <ol class="queue" id="queue"></ol>
+    <p class="flock" id="build-lock" hidden></p>
+  </section>
+
+  <section class="flow" aria-label="Dependencies">
+    <div class="flow-head"><h2>What blocks what</h2><span class="hint">Left to right in build order. Orange lines are dependencies not yet landed. Hover or tab to a package to trace its chain.</span></div>
+    <div class="graph-scroll"><svg id="graph" class="graph" role="img" aria-label="Dependency graph of the packages"></svg></div>
+  </section>
+
+  <main id="groups" class="wrap" style="padding:0;gap:22px">
+    <div class="state-msg">The package list appears here once the status store answers.</div>
+  </main>
+
+  <section class="lists">
+    <div class="panel"><h2 id="needs-label">Needs access or credentials</h2><div id="auth"><p class="empty">Nothing yet.</p></div></div>
+    <div class="panel"><h2>Questions for you</h2><div id="questions"><p class="empty">Nothing yet.</p></div></div>
+  </section>
+
+  <div class="foot" id="updated"></div>
+</div>
+
+<script>
+(function () {
+  const DEFAULT_PR_URL = "";
+  const WEIGHT = { S: 1, M: 2, L: 3 };
+  const LABEL = { landed: "Landed", landing: "Landing", running: "In progress", todo: "Not started" };
+  const ORDER = ["landed", "landing", "running", "todo"];
+  const COLOR = { landed: "var(--done)", landing: "var(--land)", running: "var(--work)", todo: "var(--todo)" };
+  let pkgs = [], meta = null;
+
+  function el(tag, cls, text) { const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+  function render() {
+    const total = pkgs.reduce((s, p) => s + (WEIGHT[p.size] || 2), 0);
+    const by = { landed: 0, landing: 0, running: 0, todo: 0 };
+    const cnt = { landed: 0, landing: 0, running: 0, todo: 0 };
+    pkgs.forEach(p => {
+      const w = WEIGHT[p.size] || 2, st = by[p.state] != null ? p.state : "todo";
+      const part = typeof p.partial === "number" ? Math.max(0, Math.min(1, p.partial)) : 0;
+      if (st === "landed") by.landed += w; else { by.landed += w * part; by[st] += w * (1 - part); }
+      cnt[st]++;
+    });
+    const pct = total ? Math.round(by.landed / total * 100) : 0;
+    document.getElementById("pct").textContent = pkgs.length ? pct + "%" : "–";
+    document.getElementById("of").textContent = pkgs.length ? cnt.landed + " of " + pkgs.length + " packages landed" : "No packages recorded yet.";
+    const bar = document.getElementById("bar"); bar.replaceChildren();
+    ["landed", "landing", "running"].forEach(s => { if (!total) return; const sp = el("span", "s-" + s); sp.style.width = (by[s] / total * 100) + "%"; bar.appendChild(sp); });
+    bar.setAttribute("aria-label", pct + "% landed");
+    const lg = document.getElementById("legend"); lg.replaceChildren();
+    ORDER.forEach(s => { const i = el("span"); const d = el("span", "dot"); d.style.background = COLOR[s]; i.append(d, el("b", null, String(cnt[s])), " " + LABEL[s].toLowerCase()); lg.appendChild(i); });
+
+    const groups = document.getElementById("groups"); groups.replaceChildren();
+    if (!pkgs.length) { groups.appendChild(el("div", "state-msg", "The package list appears here once the status store answers.")); }
+    const names = [];
+    pkgs.slice().sort((a, b) => (a.order || 0) - (b.order || 0)).forEach(p => { if (!names.includes(p.group)) names.push(p.group); });
+    names.forEach(g => {
+      const list = pkgs.filter(p => p.group === g).sort((a, b) => (a.order || 0) - (b.order || 0));
+      const sec = el("section", "group");
+      const h = el("h2"); h.append(el("span", null, g), el("span", "count", list.filter(p => p.state === "landed").length + "/" + list.length));
+      const rows = el("div", "rows");
+      list.forEach(p => {
+        const r = el("div", "row");
+        const t = el("div", "title"); t.appendChild(el("div", "name", p.name)); if (p.note) t.appendChild(el("div", "note", p.note));
+        const open = openDeps(p);
+        if (p.state !== "landed" && Array.isArray(p.deps) && p.deps.length) t.appendChild(el("div", "waits" + (open.length ? "" : " met"), open.length ? "Waits on " + open.join(", ") : "Dependencies landed: " + p.deps.join(", ")));
+        const right = el("div", "right");
+        if (Array.isArray(p.prs) && p.prs.length) { const pr = el("span", "prs"); const base = (meta && meta.prUrl) || DEFAULT_PR_URL; p.prs.forEach(n => { if (!base) { pr.appendChild(el("span", null, "#" + n)); return; } const a = el("a", null, "#" + n); a.href = base + n; a.target = "_blank"; a.rel = "noopener"; pr.appendChild(a); }); right.appendChild(pr); }
+        const st = LABEL[p.state] ? p.state : "todo";
+        right.appendChild(el("span", "chip " + st, LABEL[st]));
+        r.append(el("span", "code", p.code || ""), t, right);
+        rows.appendChild(r);
+      });
+      sec.append(h, rows); groups.appendChild(sec);
+    });
+
+    if (meta) {
+      if (meta.title) document.getElementById("heading").textContent = meta.title;
+      if (meta.subtitle) document.getElementById("subtitle").textContent = meta.subtitle;
+      document.getElementById("source").textContent = meta.source || "";
+      if (meta.needsLabel) document.getElementById("needs-label").textContent = meta.needsLabel;
+    }
+    renderQueue(); renderGraph();
+    fill("auth", meta && meta.needsAuth); fill("questions", meta && meta.questions);
+    document.getElementById("updated").textContent = meta && meta.updatedAt ? "Last updated " + meta.updatedAt : "";
+  }
+  function byCode() { const m = {}; pkgs.forEach(p => { m[p.code] = p; }); return m; }
+  function openDeps(p) { const m = byCode(); return (p.deps || []).filter(d => !m[d] || m[d].state !== "landed"); }
+
+  function renderQueue() {
+    const box = document.getElementById("queue"); box.replaceChildren();
+    const land = meta && meta.landing;
+    const m = byCode();
+    const row = (pos, entry, now) => {
+      const li = el("li", now ? "now" : null);
+      const p = m[entry.code];
+      li.appendChild(el("span", "pos", pos));
+      li.appendChild(el("span", "code", entry.code || ""));
+      const who = el("div", "who");
+      who.appendChild(el("div", null, (p && (p.short || p.name)) || entry.branch || ""));
+      if (entry.branch) who.appendChild(el("div", "br", entry.branch + (now && entry.since ? " · since " + entry.since : "")));
+      li.appendChild(who);
+      li.appendChild(el("span", "blocks", typeof entry.blocks === "number" ? (entry.blocks === 1 ? "blocks 1" : "blocks " + entry.blocks) : ""));
+      box.appendChild(li);
+    };
+    if (land && land.lock) row("Now", land.lock, true);
+    const q = (land && Array.isArray(land.queue)) ? land.queue : [];
+    q.forEach((e, i) => row(String(i + 1), e, false));
+    const fl = document.getElementById("build-lock"), f = meta && meta.buildLock;
+    fl.replaceChildren(); fl.hidden = !f;
+    if (f) {
+      fl.append(el("b", null, "Build lock: "));
+      if (f.holder) { fl.append(f.holder + " runs "); fl.appendChild(el("code", null, f.cmd || "")); if (f.since) fl.append(" since " + f.since); }
+      else fl.append("free");
+      if (f.priority) fl.append(" · priority: " + f.priority);
+      if (f.asOf) fl.append(" · as of " + f.asOf);
+    }
+    if (!(land && land.lock) && !q.length) { const li = el("li", "none"); li.appendChild(el("span", "empty", "Nothing is waiting to land.")); box.appendChild(li); }
+  }
+
+  const SVGNS = "http://www.w3.org/2000/svg";
+  function sv(tag, attrs, text) { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (text != null) e.textContent = text; return e; }
+  function renderGraph() {
+    const svg = document.getElementById("graph"); svg.replaceChildren();
+    if (!pkgs.length) return;
+    const m = byCode(), level = {};
+    const lv = (c, seen) => {
+      if (level[c] != null) return level[c];
+      const p = m[c]; if (!p || seen.has(c)) return 0; seen.add(c);
+      const ds = (p.deps || []).filter(d => m[d]);
+      level[c] = ds.length ? 1 + Math.max(...ds.map(d => lv(d, seen))) : 0; return level[c];
+    };
+    pkgs.forEach(p => lv(p.code, new Set()));
+    const cols = []; pkgs.forEach(p => { (cols[level[p.code]] = cols[level[p.code]] || []).push(p); });
+    const NW = 150, NH = 44, GX = 54, GY = 12, TOP = 26, PAD = 4;
+    const pos = {};
+    cols.forEach((col, ci) => {
+      col.sort((a, b) => {
+        const ya = (a.deps || []).filter(d => pos[d]).map(d => pos[d].y), yb = (b.deps || []).filter(d => pos[d]).map(d => pos[d].y);
+        const ma = ya.length ? ya.reduce((s, v) => s + v, 0) / ya.length : (a.order || 0) * 10;
+        const mb = yb.length ? yb.reduce((s, v) => s + v, 0) / yb.length : (b.order || 0) * 10;
+        return ma - mb || (a.order || 0) - (b.order || 0);
+      });
+      col.forEach((p, ri) => { pos[p.code] = { x: PAD + ci * (NW + GX), y: TOP + ri * (NH + GY) }; });
+    });
+    const W = PAD * 2 + cols.length * NW + (cols.length - 1) * GX;
+    const H = TOP + Math.max(...cols.map(c => c.length)) * (NH + GY) + PAD;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H); svg.setAttribute("width", W); svg.setAttribute("height", H);
+    cols.forEach((c, ci) => svg.appendChild(sv("text", { x: PAD + ci * (NW + GX), y: 14, class: "g-col" }, "Step " + (ci + 1))));
+    const edges = [];
+    pkgs.forEach(p => (p.deps || []).forEach(d => {
+      if (!pos[d]) return; const a = pos[d], b = pos[p.code];
+      const x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x, y2 = b.y + NH / 2, mx = (x1 + x2) / 2;
+      const met = m[d].state === "landed";
+      const path = sv("path", { d: `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`, class: "g-edge " + (met ? "met" : "open") });
+      path.dataset.from = d; path.dataset.to = p.code; edges.push(path); svg.appendChild(path);
+    }));
+    const nodes = {};
+    pkgs.forEach(p => {
+      const st = LABEL[p.state] ? p.state : "todo";
+      const g = sv("g", { class: "g-node " + st + (st === "todo" && !openDeps(p).length ? " ready" : ""), tabindex: "0", transform: `translate(${pos[p.code].x},${pos[p.code].y})` });
+      g.appendChild(sv("title", {}, p.code + " · " + p.name + " · " + LABEL[st] + (openDeps(p).length && st !== "landed" ? " · waits on " + openDeps(p).join(", ") : "")));
+      g.appendChild(sv("rect", { class: "box", width: NW, height: NH, rx: 7 }));
+      g.appendChild(sv("text", { class: "c", x: 10, y: 18 }, p.code));
+      const label = (p.short || p.name); g.appendChild(sv("text", { class: "n", x: 10, y: 34 }, label.length > 22 ? label.slice(0, 21) + "…" : label));
+      nodes[p.code] = g; svg.appendChild(g);
+    });
+    const chain = (start, dir) => { const out = new Set([start]); const stack = [start];
+      while (stack.length) { const c = stack.pop(); edges.forEach(e => { const from = e.dataset.from, to = e.dataset.to;
+        const nxt = dir === "up" ? (to === c ? from : null) : (from === c ? to : null);
+        if (nxt && !out.has(nxt)) { out.add(nxt); stack.push(nxt); } }); }
+      return out; };
+    const focusOn = code => {
+      const set = new Set([...chain(code, "up"), ...chain(code, "down")]);
+      svg.classList.add("focus");
+      Object.keys(nodes).forEach(c => nodes[c].classList.toggle("hi", set.has(c)));
+      edges.forEach(e => e.classList.toggle("hi", set.has(e.dataset.from) && set.has(e.dataset.to)));
+    };
+    const clear = () => { svg.classList.remove("focus"); };
+    Object.keys(nodes).forEach(c => { const g = nodes[c];
+      g.addEventListener("mouseenter", () => focusOn(c)); g.addEventListener("mouseleave", clear);
+      g.addEventListener("focus", () => focusOn(c)); g.addEventListener("blur", clear); });
+  }
+
+  function fill(id, items) {
+    const box = document.getElementById(id); box.replaceChildren();
+    if (!Array.isArray(items) || !items.length) { box.appendChild(el("p", "empty", "Nothing open.")); return; }
+    const ul = el("ul"); items.forEach(x => ul.appendChild(el("li", null, String(x)))); box.appendChild(ul);
+  }
+
+  render();
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use("db") : null;
+    if (!db) { document.getElementById("of").textContent = "The status store is not available in this view."; return; }
+    db.collection("packages").onSnapshot(s => { pkgs = s.docs.map(d => d.data()); render(); }, () => {});
+    db.doc("meta/status").onSnapshot(s => { meta = s.exists ? s.data() : null; render(); }, () => {});
+  })();
+})();
+</script>
