@@ -26,6 +26,15 @@ share the link with sees the current state.
 
 ## Install
 
+### From the Claude plugin directory (review pending)
+
+The plugin has been submitted to Anthropic's plugin directory and is waiting
+for review. Once it is listed, install it from the **Discover** tab in
+`/plugin` in Claude Code, or from [claude.ai/directory](https://claude.ai/directory).
+There is no marketplace to add first. Until then, use the marketplace below.
+
+### From the True North Consulting marketplace
+
 ```
 /plugin marketplace add True-North-Consulting/varis-context-optimization
 /plugin install varis-plan-tracker@true-north-consulting
