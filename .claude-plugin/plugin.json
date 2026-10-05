@@ -6,6 +6,7 @@
   "author": { "name": "True North Consulting" },
   "homepage": "https://github.com/True-North-Consulting/varis-plan-tracker",
   "repository": "https://github.com/True-North-Consulting/varis-plan-tracker",
+  "privacyPolicyUrl": "https://github.com/True-North-Consulting/varis-plan-tracker/blob/main/PRIVACY.md",
   "license": "MIT",
   "keywords": ["planning", "progress", "tracker", "artifact", "dependencies"]
 }
