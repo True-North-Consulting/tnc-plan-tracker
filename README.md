@@ -1,4 +1,4 @@
-# Varis Plan Tracker
+# TNC Plan Tracker
 
 A Claude Code skill that turns a multi-package plan into a live progress page.
 
@@ -36,13 +36,16 @@ There is no marketplace to add first. Until then, use the marketplace below.
 ### From the True North Consulting marketplace
 
 ```
-/plugin marketplace add True-North-Consulting/varis-context-optimization
-/plugin install varis-plan-tracker@true-north-consulting
+/plugin marketplace add True-North-Consulting/tnc-context-optimization
+/plugin install tnc-plan-tracker@true-north-consulting
 ```
 
 The `true-north-consulting` marketplace lives in the
-[varis-context-optimization](https://github.com/True-North-Consulting/varis-context-optimization)
+[tnc-context-optimization](https://github.com/True-North-Consulting/tnc-context-optimization)
 repository and lists both plugins.
+
+The plugin was called `varis-plan-tracker` before 2.0.0; uninstall that one
+before installing `tnc-plan-tracker`.
 
 ## Use
 

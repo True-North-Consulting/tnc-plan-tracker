@@ -1,6 +1,6 @@
 # Privacy
 
-Varis Plan Tracker is published by True North Consulting. It is a skill and
+TNC Plan Tracker is published by True North Consulting. It is a skill and
 an HTML template; it runs no hooks and no scripts of its own.
 
 **What we receive: nothing.** The plugin has no server. We collect no data,
@@ -21,4 +21,4 @@ Do not put secrets, credentials or personal data in a plan's notes: they end
 up on the page.
 
 **Contact.** Questions or concerns: open an issue at
-https://github.com/True-North-Consulting/varis-plan-tracker/issues.
+https://github.com/True-North-Consulting/tnc-plan-tracker/issues.
